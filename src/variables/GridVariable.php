@@ -30,8 +30,19 @@ class GridVariable
      * @param array $args
      * @return string
      */
-    public function value(array $target, array $grid, array $args=[])
+    public function value(array $target, array $grid, array $args = [])
     {
         return Grid::$plugin->grid->getGridValue($target, $grid, $args);
+    }
+
+    /**
+     * @param $target
+     * @param array $grid
+     * @param array $args
+     * @return array
+     */
+    public function getItemGridValues($target, array $grid, array $args = [])
+    {
+        return Grid::$plugin->grid->getItemGridValues($target, $grid, $args);
     }
 }

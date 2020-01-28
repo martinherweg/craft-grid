@@ -96,6 +96,8 @@ class GridService extends Component
             // BEGIN @supports
             $css = '@supports (--custom:property) {';
 
+            $lowestBreakpointItems = $this->_getLowestBreakpointItems(count($args['target']['items']), $args['value']);
+
             for ($i=0; $i<count($args['field']['layout']['breakpoints']); $i++) {
                 $breakpoint = $args['field']['layout']['breakpoints'][$i];
                 $minWidth = $breakpoint['minWidth'];
@@ -129,7 +131,7 @@ class GridService extends Component
                     $css .= ' .' . $args['selector'] . ' {';
                     $css .= $this->_gridCssForBreakpoint($breakpoint);
                     $css .= '}';
-                    $css .= $this->_gridItemCssForBreakpoint($breakpoint, $args['target']['items'], $args['value'][$breakpoint['id']] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden');
+                    $css .= $this->_gridItemCssForBreakpoint($breakpoint, $args['target']['items'], $args['value'][$breakpoint['id']] ?? [], $args['selector'], $breakpoint['notLaidOut'] ?? 'hidden', $lowestBreakpointItems);
                     $css .= '}';
                 }
             }
@@ -189,6 +191,41 @@ class GridService extends Component
         }
 
         return $value;
+    }
+
+    /**
+     * Get Column and Row Values for Grid Fields without specified target.
+     * @param $target
+     * @param array $grid
+     * @param array $args
+     * @return array
+     */
+    public function getItemGridValues($target, array $grid, array $args=[]):array
+    {
+        $gridField = $grid['field'];
+        $gridTarget = $grid['target'];
+        $gridValue = $grid['value'];
+
+        $breakpoints = [];
+        foreach ($gridField['layout']['breakpoints'] as $breakpoint) {
+            if ($breakpoint['showInInput'] !== 'hidden') {
+                $breakpoints[] = ['id' => $breakpoint['id'], 'minWidth' => $breakpoint['minWidth']];
+            }
+
+        }
+
+        $fieldValues = [];
+        foreach ($breakpoints as $breakpoint) {
+            if ($gridValue[$breakpoint['id']]['id' . $target] ?? false) {
+                $fieldValues[] =  $gridValue[$breakpoint['id']]['id' . $target];
+            }
+        }
+
+        return [
+            'inputTarget' => $target,
+            'breakpoints' => $breakpoints,
+            'values' => $fieldValues,
+        ];
     }
 
     /*
@@ -389,7 +426,7 @@ class GridService extends Component
                 }
 
                 $helperClasses = $this->_gridItemHelperClasses($this->_render['field']['target']['items'][$index], $this->_render['field']['field'], $this->_render['field']['value'], $helperClassSources, $this->_render['parent']['selector'], $index);
-                
+
                 if ($helperClasses ?? false) {
                     $classes .= ' ' . $helperClasses;
                 }
@@ -452,7 +489,7 @@ class GridService extends Component
     /*
      * @return string
      */
-    private function _gridItemCssForBreakpoint($breakpoint, $items, $value, $selector, $notLaidOut):string 
+    private function _gridItemCssForBreakpoint($breakpoint, $items, $value, $selector, $notLaidOut, $prevLayoutItems = []):string
     {
         $css = '';
         for ($i=0; $i<count($items); $i++) {
@@ -460,19 +497,44 @@ class GridService extends Component
             if (!empty($value['id' . $items[$i]['id']]) && $items[$i]['status'] === 'enabled') {
                 $item = $value['id' . $items[$i]['id']];
                 $css .= $itemSelector . ' {';
+                // Set grid position
+                $css .= 'grid-column: ' . $item['columnStart'] . ' / ' . $item['columnEnd'] . ';';
+                $css .= 'grid-row: ' . $item['rowStart'] . ' / ' . $item['rowEnd'] . ';';
+                $css .= '}';
+            } else {
+                if ($notLaidOut !== 'hidden' && count($prevLayoutItems) > 0) {
+                    $item = $prevLayoutItems['id' . $items[$i]['id']];
+                    $css .= $itemSelector . ' {';
                     // Set grid position
                     $css .= 'grid-column: ' . $item['columnStart'] . ' / ' . $item['columnEnd'] . ';';
                     $css .= 'grid-row: ' . $item['rowStart'] . ' / ' . $item['rowEnd'] . ';';
-                $css .= '}';
-            } else {
+                    $css .= '}';
+                }
                 if ($notLaidOut === 'hidden') {
                     $css .= $itemSelector . ' {';
-                        $css .= 'display: none;grid-column: 1 / 2;grid-row: 1 / 2;visibility: hidden;opacity: 0;';
+                    $css .= 'display: none;grid-column: 1 / 2;grid-row: 1 / 2;visibility: hidden;opacity: 0;';
                     $css .= '}';
                 }
             }
         }
         return $css;
+    }
+
+    /**
+     * @param $numberOfItems
+     * @param $breakpoints
+     * @return mixed
+     */
+    private function _getLowestBreakpointItems($numberOfItems, $breakpoints)
+    {
+        $breakpointItems = [];
+        foreach ($breakpoints as $id => $items) {
+            if (count($items) > 0 && count($items) === $numberOfItems) {
+                $breakpointItems[$id] = $items;
+            }
+        }
+
+        return end($breakpointItems);
     }
 
     /*
