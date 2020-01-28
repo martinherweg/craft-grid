@@ -1,42 +1,48 @@
 <?php
-/**
- * Grid plugin for Craft CMS 3.x
- *
- * Content manage CSS grids for matrix and relation fields.
- *
- * @link      http://wbrowar.com
- * @copyright Copyright (c) 2018 Will Browar
- */
+    /**
+     * Grid plugin for Craft CMS 3.x
+     *
+     * Content manage CSS grids for matrix and relation fields.
+     *
+     * @link      http://wbrowar.com
+     * @copyright Copyright (c) 2018 Will Browar
+     */
 
-namespace wbrowar\grid\variables;
+    namespace wbrowar\grid\variables;
 
-use wbrowar\grid\Grid;
+    use wbrowar\grid\Grid;
 
-use Craft;
-
-/**
- * @author    Will Browar
- * @package   Grid
- * @since     1.0.0
- */
-class GridVariable
-{
-    // Public Methods
-    // =========================================================================
+    use Craft;
 
     /**
-     * @param array $target
-     * @param array $grid
-     * @param array $args
-     * @return string
+     * @author    Will Browar
+     * @package   Grid
+     * @since     1.0.0
      */
-    public function value(array $target, array $grid, array $args=[])
+    class GridVariable
     {
-        return Grid::$plugin->grid->getGridValue($target, $grid, $args);
-    }
+        // Public Methods
+        // =========================================================================
 
-    public function getItemGridValues($target, array $grid, array $args=[])
-    {
-        return Grid::$plugin->grid->getItemGridValues($target, $grid, $args);
+        /**
+         * @param array $target
+         * @param array $grid
+         * @param array $args
+         * @return string
+         */
+        public function value(array $target, array $grid, array $args=[])
+        {
+            return Grid::$plugin->grid->getGridValue($target, $grid, $args);
+        }
+
+        /**
+         * @param $target
+         * @param array $grid
+         * @param array $args
+         * @return array
+         */
+        public function getItemGridValues($target, array $grid, array $args=[])
+        {
+            return Grid::$plugin->grid->getItemGridValues($target, $grid, $args);
+        }
     }
-}

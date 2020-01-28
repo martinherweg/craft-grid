@@ -193,6 +193,13 @@
             return $value;
         }
 
+        /**
+         * Get Column and Row Values for Grid Fields without specified target.
+         * @param $target
+         * @param array $grid
+         * @param array $args
+         * @return array
+         */
         public function getItemGridValues($target, array $grid, array $args=[]):array
         {
             $gridField = $grid['field'];
