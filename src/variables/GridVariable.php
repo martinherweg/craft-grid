@@ -34,4 +34,9 @@ class GridVariable
     {
         return Grid::$plugin->grid->getGridValue($target, $grid, $args);
     }
+
+    public function getItemGridValues($target, array $grid, array $args=[])
+    {
+        return Grid::$plugin->grid->getItemGridValues($target, $grid, $args);
+    }
 }
